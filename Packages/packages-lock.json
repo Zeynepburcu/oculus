@@ -267,7 +267,11 @@
     },
     "com.unity.xr.legacyinputhelpers": {
       "version": "2.1.10",
+<<<<<<< HEAD
       "depth": 1,
+=======
+      "depth": 2,
+>>>>>>> origin/Berkay
       "source": "registry",
       "dependencies": {
         "com.unity.modules.vr": "1.0.0",
@@ -276,8 +280,13 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.xr.management": {
+<<<<<<< HEAD
       "version": "4.5.0",
       "depth": 0,
+=======
+      "version": "4.4.0",
+      "depth": 1,
+>>>>>>> origin/Berkay
       "source": "registry",
       "dependencies": {
         "com.unity.modules.vr": "1.0.0",

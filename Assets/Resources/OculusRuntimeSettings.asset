@@ -15,6 +15,10 @@ MonoBehaviour:
   colorSpace: 7
   requestsVisualFaceTracking: 1
   requestsAudioFaceTracking: 1
+<<<<<<< HEAD
   telemetryProjectGuid: 0efb90f5-190f-43cb-a424-ccceb2a963c4
+=======
+  telemetryProjectGuid: 4802b276-20bf-402b-9dc0-2c3d150df019
+>>>>>>> origin/Berkay
   bodyTrackingFidelity: 1
   bodyTrackingJointSet: 0

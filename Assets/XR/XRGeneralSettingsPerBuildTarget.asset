@@ -1,6 +1,10 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+<<<<<<< HEAD
 --- !u!114 &11400000
+=======
+--- !u!114 &-7629768254224268071
+>>>>>>> origin/Berkay
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9,6 +13,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
+<<<<<<< HEAD
   m_Script: {fileID: 11500000, guid: d2dc886499c26824283350fa532d087d, type: 3}
   m_Name: XRGeneralSettingsPerBuildTarget
   m_EditorClassIdentifier: 
@@ -17,6 +22,14 @@ MonoBehaviour:
   - {fileID: 4853837075870152278}
   - {fileID: 4840274865590182453}
 --- !u!114 &2971873099670988100
+=======
+  m_Script: {fileID: 11500000, guid: d236b7d11115f2143951f1e14045df39, type: 3}
+  m_Name: Standalone Settings
+  m_EditorClassIdentifier: 
+  m_LoaderManagerInstance: {fileID: -3172326116038527543}
+  m_InitManagerOnStart: 1
+--- !u!114 &-3172326116038527543
+>>>>>>> origin/Berkay
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -32,8 +45,13 @@ MonoBehaviour:
   m_AutomaticLoading: 0
   m_AutomaticRunning: 0
   m_Loaders:
+<<<<<<< HEAD
   - {fileID: 11400000, guid: 1e10fb76407961f4ca04f9b3c5a38951, type: 2}
 --- !u!114 &3694248493859148363
+=======
+  - {fileID: 11400000, guid: cb668886d9c174fb0bdbf2f600f76008, type: 2}
+--- !u!114 &-375740390181025786
+>>>>>>> origin/Berkay
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -49,8 +67,13 @@ MonoBehaviour:
   m_AutomaticLoading: 0
   m_AutomaticRunning: 0
   m_Loaders:
+<<<<<<< HEAD
   - {fileID: 11400000, guid: 1e10fb76407961f4ca04f9b3c5a38951, type: 2}
 --- !u!114 &4840274865590182453
+=======
+  - {fileID: 11400000, guid: cb668886d9c174fb0bdbf2f600f76008, type: 2}
+--- !u!114 &11400000
+>>>>>>> origin/Berkay
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -59,12 +82,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
+<<<<<<< HEAD
   m_Script: {fileID: 11500000, guid: d236b7d11115f2143951f1e14045df39, type: 3}
   m_Name: Standalone Settings
   m_EditorClassIdentifier: 
   m_LoaderManagerInstance: {fileID: 2971873099670988100}
   m_InitManagerOnStart: 1
 --- !u!114 &4853837075870152278
+=======
+  m_Script: {fileID: 11500000, guid: d2dc886499c26824283350fa532d087d, type: 3}
+  m_Name: XRGeneralSettingsPerBuildTarget
+  m_EditorClassIdentifier: 
+  Keys: 0700000001000000
+  Values:
+  - {fileID: 7913601881981060416}
+  - {fileID: -7629768254224268071}
+--- !u!114 &7913601881981060416
+>>>>>>> origin/Berkay
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -76,5 +110,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d236b7d11115f2143951f1e14045df39, type: 3}
   m_Name: Android Settings
   m_EditorClassIdentifier: 
+<<<<<<< HEAD
   m_LoaderManagerInstance: {fileID: 3694248493859148363}
+=======
+  m_LoaderManagerInstance: {fileID: -375740390181025786}
+>>>>>>> origin/Berkay
   m_InitManagerOnStart: 1

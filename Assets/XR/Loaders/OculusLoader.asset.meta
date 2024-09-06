@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: 1e10fb76407961f4ca04f9b3c5a38951
+=======
+guid: cb668886d9c174fb0bdbf2f600f76008
+>>>>>>> origin/Berkay
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 11400000

@@ -175,7 +175,11 @@ PlayerSettings:
   overrideDefaultApplicationIdentifier: 1
   AndroidBundleVersionCode: 1
   AndroidMinSdkVersion: 29
+<<<<<<< HEAD
   AndroidTargetSdkVersion: 32
+=======
+  AndroidTargetSdkVersion: 0
+>>>>>>> origin/Berkay
   AndroidPreferredInstallLocation: 0
   aotOptions: 
   stripEngineCode: 1
