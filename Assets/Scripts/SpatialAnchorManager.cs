@@ -16,7 +16,6 @@ public class SpatialAnchorManager : MonoBehaviour
     private OVRSpatialAnchor lastCreatedAnchor;
     private AnchorLoader anchorLoader;
 
-
     private void Awake()
     {
         anchorLoader = GetComponent<AnchorLoader>();
@@ -38,15 +37,21 @@ public class SpatialAnchorManager : MonoBehaviour
         {
             UnsaveLastCreatedAnchor();
         }
+
         if (OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger, OVRInput.Controller.RTouch))
         {
             UnsaveAllAnchors();
         }
+
         if (OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.RTouch))
         {
             LoadSavedAnchors();
         }
-        
+
+        if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch)) 
+        {
+            DeleteLastCreatedAnchor();
+        }
     }
 
     public void CreateSpatialAnchor()
@@ -80,8 +85,8 @@ public class SpatialAnchorManager : MonoBehaviour
         {
             if (success)
             {
-                savedStatusText.text = "Saved"; // Fixed typo from "Sawed" to "Saved"
-                SaveUuidToPlayerPrefs(lastCreatedAnchor.Uuid); // Save UUID after successful save
+                savedStatusText.text = "Saved";
+                SaveUuidToPlayerPrefs(lastCreatedAnchor.Uuid);
             }
         });
     }
@@ -108,7 +113,7 @@ public class SpatialAnchorManager : MonoBehaviour
             }
         });
     }
-    
+
     private void UnsaveAllAnchors()
     {
         foreach (var anchor in anchors)
@@ -135,7 +140,7 @@ public class SpatialAnchorManager : MonoBehaviour
             }
         });
     }
-    
+
     private void ClearAllUuidsFromPlayerPrefs()
     {
         if (PlayerPrefs.HasKey(NumUuidsPlayerPref))
@@ -155,6 +160,15 @@ public class SpatialAnchorManager : MonoBehaviour
     {
         anchorLoader.LoadAnchorsByUuid();
     }
-    
-    
+
+    private void DeleteLastCreatedAnchor() // Yeni fonksiyon: Son üretilen anchor'ı tamamen sil
+    {
+        if (lastCreatedAnchor != null)
+        {
+            Destroy(lastCreatedAnchor.gameObject); // Anchor'ı sahneden siler
+            anchors.Remove(lastCreatedAnchor); // Listeden çıkarır
+            lastCreatedAnchor = null; // Null yaparak referansı temizler
+            savedStatusText.text = "Deleted"; // Durum mesajını günceller
+        }
+    }
 }

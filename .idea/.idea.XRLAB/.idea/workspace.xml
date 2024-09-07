@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="a92d674a-0345-45f7-8d6a-de18e7716db7" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.XRLAB/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.XRLAB/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefab/Anchor.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefab/Anchor.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/SpatialAnchorManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/SpatialAnchorManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Anchors_Test.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Anchors_Test.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/TextMesh Pro/Resources/Fonts &amp; Materials/LiberationSans SDF - Fallback.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TextMesh Pro/Resources/Fonts &amp; Materials/LiberationSans SDF - Fallback.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -97,7 +97,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1725627305927</updated>
-      <workItem from="1725627307837" duration="8571000" />
+      <workItem from="1725627307837" duration="9537000" />
     </task>
     <servers />
   </component>
