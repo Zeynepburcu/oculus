@@ -14,6 +14,13 @@ public class SpatialAnchorManager : MonoBehaviour
     private TextMeshProUGUI savedStatusText;
     private List<OVRSpatialAnchor> anchors = new List<OVRSpatialAnchor>();
     private OVRSpatialAnchor lastCreatedAnchor;
+    private AnchorLoader anchorLoader;
+
+
+    private void Awake()
+    {
+        anchorLoader = GetComponent<AnchorLoader>();
+    }
 
     void Update()
     {
@@ -31,6 +38,15 @@ public class SpatialAnchorManager : MonoBehaviour
         {
             UnsaveLastCreatedAnchor();
         }
+        if (OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger, OVRInput.Controller.RTouch))
+        {
+            UnsaveAllAnchors();
+        }
+        if (OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.RTouch))
+        {
+            LoadSavedAnchors();
+        }
+        
     }
 
     public void CreateSpatialAnchor()
@@ -60,11 +76,12 @@ public class SpatialAnchorManager : MonoBehaviour
 
     private void SaveLastCreatedAnchor()
     {
-        lastCreatedAnchor.Save ((lastCreatedAnchor, success) =>
+        lastCreatedAnchor.Save((lastCreatedAnchor, success) =>
         {
             if (success)
             {
-                savedStatusText.text = "Sawed";
+                savedStatusText.text = "Saved"; // Fixed typo from "Sawed" to "Saved"
+                SaveUuidToPlayerPrefs(lastCreatedAnchor.Uuid); // Save UUID after successful save
             }
         });
     }
@@ -76,9 +93,9 @@ public class SpatialAnchorManager : MonoBehaviour
             PlayerPrefs.SetInt(NumUuidsPlayerPref, 0);
         }
 
-        int PlayerNumUuids = PlayerPrefs.GetInt(NumUuidsPlayerPref);
-        PlayerPrefs.SetString("uuid" + PlayerNumUuids, uuid.ToString());
-        PlayerPrefs.SetInt(NumUuidsPlayerPref, ++PlayerNumUuids);
+        int playerNumUuids = PlayerPrefs.GetInt(NumUuidsPlayerPref);
+        PlayerPrefs.SetString("uuid" + playerNumUuids, uuid.ToString());
+        PlayerPrefs.SetInt(NumUuidsPlayerPref, ++playerNumUuids);
     }
 
     private void UnsaveLastCreatedAnchor()
@@ -91,4 +108,53 @@ public class SpatialAnchorManager : MonoBehaviour
             }
         });
     }
+    
+    private void UnsaveAllAnchors()
+    {
+        foreach (var anchor in anchors)
+        {
+            UnsaveAnchor(anchor);
+        }
+
+        anchors.Clear();
+        ClearAllUuidsFromPlayerPrefs();
+    }
+
+    private void UnsaveAnchor(OVRSpatialAnchor anchor)
+    {
+        anchor.Erase((erasedAnchor, success) =>
+        {
+            if (success)
+            {
+                var textComponents = erasedAnchor.GetComponentsInChildren<TextMeshProUGUI>();
+                if (textComponents.Length > 1)
+                {
+                    var savedStatusText = textComponents[1];
+                    savedStatusText.text = "Not Saved";
+                }
+            }
+        });
+    }
+    
+    private void ClearAllUuidsFromPlayerPrefs()
+    {
+        if (PlayerPrefs.HasKey(NumUuidsPlayerPref))
+        {
+            int playerNumUuids = PlayerPrefs.GetInt(NumUuidsPlayerPref);
+            for (int i = 0; i < playerNumUuids; i++)
+            {
+                PlayerPrefs.DeleteKey("uuid" + i);
+            }
+
+            PlayerPrefs.DeleteKey(NumUuidsPlayerPref);
+            PlayerPrefs.Save();
+        }
+    }
+
+    public void LoadSavedAnchors()
+    {
+        anchorLoader.LoadAnchorsByUuid();
+    }
+    
+    
 }
