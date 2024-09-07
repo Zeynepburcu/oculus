@@ -8,13 +8,20 @@ public class SpatialAnchorManager : MonoBehaviour
 {
     public OVRSpatialAnchor anchorPrefab;
     public const string NumUuidsPlayerPref = "numUuids";
-
+    
     private Canvas canvas;
     private TextMeshProUGUI uuidText;
     private TextMeshProUGUI savedStatusText;
+    private TextMeshProUGUI colorNameText;
     private List<OVRSpatialAnchor> anchors = new List<OVRSpatialAnchor>();
     private OVRSpatialAnchor lastCreatedAnchor;
     private AnchorLoader anchorLoader;
+
+    // Renk isimleri listesi
+    private List<string> colorNames = new List<string> { "Red", "Blue", "Green", "Yellow", "Purple", "Orange", "Pink", "Cyan", "Magenta", "Brown" };
+
+    // Kullanılan renklerin listesi
+    private List<string> usedColorNames = new List<string>();
 
     private void Awake()
     {
@@ -48,7 +55,7 @@ public class SpatialAnchorManager : MonoBehaviour
             LoadSavedAnchors();
         }
 
-        if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch)) 
+        if (OVRInput.GetDown(OVRInput.Button.Three, OVRInput.Controller.RTouch))
         {
             DeleteLastCreatedAnchor();
         }
@@ -60,11 +67,16 @@ public class SpatialAnchorManager : MonoBehaviour
         canvas = workingAnchor.gameObject.GetComponentInChildren<Canvas>();
         uuidText = canvas.gameObject.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
         savedStatusText = canvas.gameObject.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+        colorNameText = canvas.gameObject.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
 
-        StartCoroutine(AnchorCreated(workingAnchor));
+        // Rastgele bir renk ismi seç ve renk ismi kullanılmamışsa ata
+        string randomColorName = GetRandomColorName();
+        colorNameText.text = "Color: " + randomColorName;
+
+        StartCoroutine(AnchorCreated(workingAnchor, randomColorName));
     }
 
-    private IEnumerator AnchorCreated(OVRSpatialAnchor workingAnchor)
+    private IEnumerator AnchorCreated(OVRSpatialAnchor workingAnchor, string colorName)
     {
         while (!workingAnchor.Created && !workingAnchor.Localized)
         {
@@ -77,6 +89,7 @@ public class SpatialAnchorManager : MonoBehaviour
 
         uuidText.text = "UUID: " + anchorGuid.ToString();
         savedStatusText.text = "Not Saved";
+        colorNameText.text = "Room: " + colorName;
     }
 
     private void SaveLastCreatedAnchor()
@@ -161,14 +174,38 @@ public class SpatialAnchorManager : MonoBehaviour
         anchorLoader.LoadAnchorsByUuid();
     }
 
-    private void DeleteLastCreatedAnchor() // Yeni fonksiyon: Son üretilen anchor'ı tamamen sil
+    private void DeleteLastCreatedAnchor()
     {
         if (lastCreatedAnchor != null)
         {
-            Destroy(lastCreatedAnchor.gameObject); // Anchor'ı sahneden siler
-            anchors.Remove(lastCreatedAnchor); // Listeden çıkarır
-            lastCreatedAnchor = null; // Null yaparak referansı temizler
-            savedStatusText.text = "Deleted"; // Durum mesajını günceller
+            Destroy(lastCreatedAnchor.gameObject);
+            anchors.Remove(lastCreatedAnchor);
+            lastCreatedAnchor = null;
+            savedStatusText.text = "Deleted";
         }
+    }
+
+   
+    private string GetRandomColorName()
+    {
+        
+        List<string> availableColors = new List<string>(colorNames);
+        availableColors.RemoveAll(color => usedColorNames.Contains(color));
+
+        if (availableColors.Count == 0)
+        {
+            
+            usedColorNames.Clear();
+            availableColors = new List<string>(colorNames);
+        }
+
+       
+        int randomIndex = UnityEngine.Random.Range(0, availableColors.Count);
+        string selectedColor = availableColors[randomIndex];
+
+     
+        usedColorNames.Add(selectedColor);
+
+        return selectedColor;
     }
 }
