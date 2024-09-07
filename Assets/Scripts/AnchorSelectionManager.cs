@@ -1,11 +1,10 @@
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class AnchorSelectionManager : MonoBehaviour
 {
-    public List<OVRSpatialAnchor> anchors; // Sahnedeki tüm anchor'lar burada olacak
+    public List<OVRSpatialAnchor> anchors = new List<OVRSpatialAnchor>(); // Sahnedeki tüm anchor'lar burada olacak
     public Dropdown firstAnchorDropdown; // İlk dropdown
     public Dropdown secondAnchorDropdown; // İkinci dropdown
     public Button confirmButton; // Seçimleri onaylamak için kullanılacak buton
@@ -15,9 +14,6 @@ public class AnchorSelectionManager : MonoBehaviour
 
     private void Start()
     {
-        // Dropdown menülerini doldur
-        PopulateDropdowns();
-
         // Onay butonuna tıklanınca işlemi yap
         confirmButton.onClick.AddListener(OnConfirmButtonClicked);
 
@@ -27,7 +23,7 @@ public class AnchorSelectionManager : MonoBehaviour
     }
 
     // Dropdown menülerine anchor isimlerini ekleme
-    private void PopulateDropdowns()
+    public void PopulateDropdowns()
     {
         // Dropdown menülerini sıfırla
         firstAnchorDropdown.ClearOptions();
