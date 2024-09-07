@@ -7,21 +7,22 @@ using TMPro;
 public class SpatialAnchorManager : MonoBehaviour
 {
     public OVRSpatialAnchor anchorPrefab;
-    public const string NumUuidsPlayerPref = "numUuids";
+    public GameObject followSphere; // Top Prefab
+    public float followSpeed = 5.0f;
     
-    private Canvas canvas;
-    private TextMeshProUGUI uuidText;
-    private TextMeshProUGUI savedStatusText;
-    private TextMeshProUGUI colorNameText;
-    private List<OVRSpatialAnchor> anchors = new List<OVRSpatialAnchor>();
+    // NumUuidsPlayerPref sabiti, UUID'leri kaydetmek ve yüklemek için kullanılacak
+    public const string NumUuidsPlayerPref = "numUuids";
+
+    private List<Vector3> anchorPositions = new List<Vector3>(); // Anchor pozisyonlarını saklar
+    private List<OVRSpatialAnchor> anchors = new List<OVRSpatialAnchor>(); // Tüm anchorları saklar
     private OVRSpatialAnchor lastCreatedAnchor;
     private AnchorLoader anchorLoader;
 
-    // Renk isimleri listesi
     private List<string> colorNames = new List<string> { "Red", "Blue", "Green", "Yellow", "Purple", "Orange", "Pink", "Cyan", "Magenta", "Brown" };
-
-    // Kullanılan renklerin listesi
     private List<string> usedColorNames = new List<string>();
+
+    private int currentTargetIndex = 0;
+    private List<Vector3> shortestPath; // En kısa yol noktalarını saklar
 
     private void Awake()
     {
@@ -35,177 +36,81 @@ public class SpatialAnchorManager : MonoBehaviour
             CreateSpatialAnchor();
         }
 
-        if (OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.RTouch))
-        {
-            SaveLastCreatedAnchor();
-        }
-
-        if (OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.RTouch))
-        {
-            UnsaveLastCreatedAnchor();
-        }
-
-        if (OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger, OVRInput.Controller.RTouch))
-        {
-            UnsaveAllAnchors();
-        }
-
-        if (OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.RTouch))
-        {
-            LoadSavedAnchors();
-        }
-
-        if (OVRInput.GetDown(OVRInput.Button.Three, OVRInput.Controller.RTouch))
-        {
-            DeleteLastCreatedAnchor();
-        }
+        // Topun yolu takip etmesi
+        FollowPath();
     }
 
+    // Anchor oluşturma fonksiyonu
     public void CreateSpatialAnchor()
     {
         OVRSpatialAnchor workingAnchor = Instantiate(anchorPrefab, OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch), OVRInput.GetLocalControllerRotation(OVRInput.Controller.RTouch));
-        canvas = workingAnchor.gameObject.GetComponentInChildren<Canvas>();
-        uuidText = canvas.gameObject.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-        savedStatusText = canvas.gameObject.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
-        colorNameText = canvas.gameObject.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
 
-        // Rastgele bir renk ismi seç ve renk ismi kullanılmamışsa ata
-        string randomColorName = GetRandomColorName();
-        colorNameText.text = "Color: " + randomColorName;
+        // Anchor pozisyonunu kaydet
+        anchorPositions.Add(workingAnchor.transform.position);
 
-        StartCoroutine(AnchorCreated(workingAnchor, randomColorName));
-    }
-
-    private IEnumerator AnchorCreated(OVRSpatialAnchor workingAnchor, string colorName)
-    {
-        while (!workingAnchor.Created && !workingAnchor.Localized)
-        {
-            yield return new WaitForEndOfFrame();
-        }
-
-        Guid anchorGuid = workingAnchor.Uuid;
+        // Anchorları listeye ekle
         anchors.Add(workingAnchor);
         lastCreatedAnchor = workingAnchor;
 
-        uuidText.text = "UUID: " + anchorGuid.ToString();
-        savedStatusText.text = "Not Saved";
-        colorNameText.text = "Room: " + colorName;
+        // Rastgele bir renk ismi seçiyoruz
+        string randomColorName = GetRandomColorName();
+
+        // Prefab içindeki AnchorDisplay script'ini alıp bilgileri güncelliyoruz
+        AnchorDisplay anchorDisplay = workingAnchor.GetComponentInChildren<AnchorDisplay>();
+        anchorDisplay.SetTexts(workingAnchor.Uuid.ToString(), "Not Saved", randomColorName);
+
+        // En kısa yolu hesapla
+        shortestPath = CalculateShortestPath();
     }
 
-    private void SaveLastCreatedAnchor()
-    {
-        lastCreatedAnchor.Save((lastCreatedAnchor, success) =>
-        {
-            if (success)
-            {
-                savedStatusText.text = "Saved";
-                SaveUuidToPlayerPrefs(lastCreatedAnchor.Uuid);
-            }
-        });
-    }
-
-    void SaveUuidToPlayerPrefs(Guid uuid)
-    {
-        if (!PlayerPrefs.HasKey(NumUuidsPlayerPref))
-        {
-            PlayerPrefs.SetInt(NumUuidsPlayerPref, 0);
-        }
-
-        int playerNumUuids = PlayerPrefs.GetInt(NumUuidsPlayerPref);
-        PlayerPrefs.SetString("uuid" + playerNumUuids, uuid.ToString());
-        PlayerPrefs.SetInt(NumUuidsPlayerPref, ++playerNumUuids);
-    }
-
-    private void UnsaveLastCreatedAnchor()
-    {
-        lastCreatedAnchor.Erase((lastCreatedAnchor, success) => 
-        {
-            if (success)
-            {
-                savedStatusText.text = "Not Saved";
-            }
-        });
-    }
-
-    private void UnsaveAllAnchors()
-    {
-        foreach (var anchor in anchors)
-        {
-            UnsaveAnchor(anchor);
-        }
-
-        anchors.Clear();
-        ClearAllUuidsFromPlayerPrefs();
-    }
-
-    private void UnsaveAnchor(OVRSpatialAnchor anchor)
-    {
-        anchor.Erase((erasedAnchor, success) =>
-        {
-            if (success)
-            {
-                var textComponents = erasedAnchor.GetComponentsInChildren<TextMeshProUGUI>();
-                if (textComponents.Length > 1)
-                {
-                    var savedStatusText = textComponents[1];
-                    savedStatusText.text = "Not Saved";
-                }
-            }
-        });
-    }
-
-    private void ClearAllUuidsFromPlayerPrefs()
-    {
-        if (PlayerPrefs.HasKey(NumUuidsPlayerPref))
-        {
-            int playerNumUuids = PlayerPrefs.GetInt(NumUuidsPlayerPref);
-            for (int i = 0; i < playerNumUuids; i++)
-            {
-                PlayerPrefs.DeleteKey("uuid" + i);
-            }
-
-            PlayerPrefs.DeleteKey(NumUuidsPlayerPref);
-            PlayerPrefs.Save();
-        }
-    }
-
-    public void LoadSavedAnchors()
-    {
-        anchorLoader.LoadAnchorsByUuid();
-    }
-
-    private void DeleteLastCreatedAnchor()
-    {
-        if (lastCreatedAnchor != null)
-        {
-            Destroy(lastCreatedAnchor.gameObject);
-            anchors.Remove(lastCreatedAnchor);
-            lastCreatedAnchor = null;
-            savedStatusText.text = "Deleted";
-        }
-    }
-
-   
+    // Rastgele renk ismi seç
     private string GetRandomColorName()
     {
-        
         List<string> availableColors = new List<string>(colorNames);
         availableColors.RemoveAll(color => usedColorNames.Contains(color));
 
         if (availableColors.Count == 0)
         {
-            
             usedColorNames.Clear();
             availableColors = new List<string>(colorNames);
         }
 
-       
         int randomIndex = UnityEngine.Random.Range(0, availableColors.Count);
         string selectedColor = availableColors[randomIndex];
-
-     
         usedColorNames.Add(selectedColor);
 
         return selectedColor;
+    }
+
+    // En kısa yol hesaplaması (basit sıralı yol)
+    private List<Vector3> CalculateShortestPath()
+    {
+        List<Vector3> path = new List<Vector3>();
+
+        if (anchorPositions.Count > 1)
+        {
+            // Şu an basit bir sıralı ziyaret
+            path.AddRange(anchorPositions);
+        }
+
+        return path;
+    }
+
+    // Topun en kısa yolu takip etmesi
+    private void FollowPath()
+    {
+        if (shortestPath != null && currentTargetIndex < shortestPath.Count)
+        {
+            Vector3 targetPosition = shortestPath[currentTargetIndex];
+
+            // Topu hedef pozisyona doğru hareket ettir
+            followSphere.transform.position = Vector3.MoveTowards(followSphere.transform.position, targetPosition, followSpeed * Time.deltaTime);
+
+            // Top hedef pozisyona ulaştıysa bir sonraki hedefe geç
+            if (Vector3.Distance(followSphere.transform.position, targetPosition) < 0.1f)
+            {
+                currentTargetIndex++;
+            }
+        }
     }
 }

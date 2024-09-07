@@ -6,33 +6,39 @@ public class AnchorLoader : MonoBehaviour
 {
     private OVRSpatialAnchor anchorPrefab;
     private SpatialAnchorManager spatialAnchorManager;
-    Action<OVRSpatialAnchor.UnboundAnchor, bool> _onLoadAnchor;
+    private Action<OVRSpatialAnchor.UnboundAnchor, bool> _onLoadAnchor;
 
     private void Awake()
     {
+        // SpatialAnchorManager bileşenini alıyoruz
         spatialAnchorManager = GetComponent<SpatialAnchorManager>();
+        // SpatialAnchorManager'dan anchorPrefab'i alıyoruz
         anchorPrefab = spatialAnchorManager?.anchorPrefab;
+        // Yerelleştirme için callback fonksiyonu oluşturuyoruz
         _onLoadAnchor = OnLocalized;
     }
 
     public void LoadAnchorsByUuid()
     {
+        // `SpatialAnchorManager.NumUuidsPlayerPref` ile PlayerPrefs'e erişiyoruz
         if (!PlayerPrefs.HasKey(SpatialAnchorManager.NumUuidsPlayerPref))
         {
             PlayerPrefs.SetInt(SpatialAnchorManager.NumUuidsPlayerPref, 0);
         }
 
-        var playerUuidCount = PlayerPrefs.GetInt(SpatialAnchorManager.NumUuidsPlayerPref);
+        int playerUuidCount = PlayerPrefs.GetInt(SpatialAnchorManager.NumUuidsPlayerPref);
 
         if (playerUuidCount == 0)
+        {
+            Debug.Log("No saved UUIDs found.");
             return;
+        }
 
         var uuids = new Guid[playerUuidCount];
         for (int i = 0; i < playerUuidCount; i++)
         {
             var uuidKey = "uuid" + i;
             var currentUuid = PlayerPrefs.GetString(uuidKey);
-            
             uuids[i] = new Guid(currentUuid);
         }
 
@@ -46,11 +52,13 @@ public class AnchorLoader : MonoBehaviour
 
     private void Load(OVRSpatialAnchor.LoadOptions options)
     {
+        // UnboundAnchors'ı yüklüyoruz
         OVRSpatialAnchor.LoadUnboundAnchors(options, anchors =>
         {
-            if (anchors == null)
+            if (anchors == null || anchors.Length == 0)
             {
-                return; 
+                Debug.Log("No anchors found.");
+                return;
             }
 
             foreach (var unboundAnchor in anchors)
@@ -69,16 +77,17 @@ public class AnchorLoader : MonoBehaviour
 
     private void OnLocalized(OVRSpatialAnchor.UnboundAnchor unboundAnchor, bool success)
     {
-        if (!success) return;
+        if (!success)
+        {
+            Debug.LogError("Failed to localize anchor.");
+            return;
+        }
 
-        // Bind the unbound anchor to a new spatial anchor instance
-  
-
-        // Use transform properties to get position and rotation
-        var pose = unboundAnchor.Pose;
+        // Unbound anchor'ı yeni bir spatial anchor'a bağlıyoruz
+        var pose = unboundAnchor.Pose; // Konum ve rotasyon al
         var instantiatedAnchor = Instantiate(anchorPrefab, pose.position, pose.rotation);
-        
-        // Now you can display the UUID and status
+
+        // UUID ve durumu gösteriyoruz
         if (instantiatedAnchor.TryGetComponent<OVRSpatialAnchor>(out var foundAnchor))
         {
             var uuidText = instantiatedAnchor.GetComponentInChildren<TextMeshProUGUI>();
