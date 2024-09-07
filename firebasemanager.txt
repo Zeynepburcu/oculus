@@ -1,0 +1,113 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Firebase;
+using Firebase.Database;
+using Firebase.Extensions;
+
+public class FirebaseManager : MonoBehaviour
+{
+    private DatabaseReference databaseReference;
+
+    void Start()
+    {
+        // Firebase bağlantısını başlat
+        FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.Result == DependencyStatus.Available)
+            {
+                // Realtime Database referansını al
+                databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
+                Debug.Log("Firebase bağlantısı başarılı!");
+            }
+            else
+            {
+                Debug.LogError("Firebase bağlantısı başarısız: " + task.Result);
+            }
+        });
+    }
+
+    // Anchor verisini Firebase'e kaydetme
+    public void SaveAnchorData(string uuid, Vector3 position)
+    {
+        // Anchor verisi JSON formatına dönüştürülüyor
+        AnchorData anchorData = new AnchorData(uuid, position.x, position.y, position.z);
+        string json = JsonUtility.ToJson(anchorData);
+
+        // Veriyi Firebase'e kaydet
+        databaseReference.Child("anchors").Child(uuid).SetRawJsonValueAsync(json).ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted)
+            {
+                Debug.Log("Anchor verisi başarıyla kaydedildi: UUID - " + uuid);
+            }
+            else
+            {
+                Debug.LogError("Anchor verisi yazma hatası: " + task.Exception);
+            }
+        });
+    }
+
+    // Anchor verisini Firebase'den silme
+    public void DeleteAnchorData(string uuid)
+    {
+        // Firebase'den veriyi silme
+        databaseReference.Child("anchors").Child(uuid).RemoveValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted)
+            {
+                Debug.Log("Anchor verisi başarıyla silindi: UUID - " + uuid);
+            }
+            else
+            {
+                Debug.LogError("Anchor verisi silme hatası: " + task.Exception);
+            }
+        });
+    }
+
+    // Firebase'den tüm anchor verilerini okuma
+    public void LoadAllAnchors(System.Action<Dictionary<string, AnchorData>> onDataLoaded)
+    {
+        databaseReference.Child("anchors").GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted)
+            {
+                DataSnapshot snapshot = task.Result;
+                Dictionary<string, AnchorData> anchors = new Dictionary<string, AnchorData>();
+
+                foreach (DataSnapshot anchorSnapshot in snapshot.Children)
+                {
+                    string uuid = anchorSnapshot.Child("uuid").Value.ToString();
+                    float x = float.Parse(anchorSnapshot.Child("x").Value.ToString());
+                    float y = float.Parse(anchorSnapshot.Child("y").Value.ToString());
+                    float z = float.Parse(anchorSnapshot.Child("z").Value.ToString());
+
+                    AnchorData anchorData = new AnchorData(uuid, x, y, z);
+                    anchors[uuid] = anchorData;
+                }
+
+                onDataLoaded?.Invoke(anchors);
+            }
+            else
+            {
+                Debug.LogError("Anchor verisi okuma hatası: " + task.Exception);
+            }
+        });
+    }
+}
+
+// Anchor verisi sınıfı
+[System.Serializable]
+public class AnchorData
+{
+    public string uuid;
+    public float x, y, z;
+
+    public AnchorData(string uuid, float x, float y, float z)
+    {
+        this.uuid = uuid;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+}
